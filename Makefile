@@ -1,21 +1,26 @@
 CXX      	:= -c++
 GCC			:= -gcc
-CXXFLAGS 	:= -g
-BUILD_DIR   := ./build
+CXXFLAGS 	:= -g -c
+BUILD_DIR   := build
 OBJ_DIR  	:= $(BUILD_DIR)/objects
 TARGET   	:= OurCypher
 INCLUDES 	:= -I./include/ -I/usr/include/openssl/ -I./include/sse/
 LIBRARIES 	:= -L.lib/
-SRC      	:=           		 			\
+CPPSRC      	:=           		 			\
 	$(wildcard src/*.cpp) 		 			\
-	$(wildcard src/Lyra2/*.c) 			\
 	$(wildcard src/HashWrapper/*.cpp) 		\
 	$(wildcard src/AES/*.cpp) 				\
 
-OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
+CSRC      	:=           		 			\
+	$(wildcard src/Lyra2/*.c) 				\
+
+COBJ := $(CSRC:%.c=$(OBJ_DIR)/%.o)
+CPPOBJ := $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o) 
+OBJ := $(COBJ) $(CPPOBJ) 
 LINKER_LIBS := -lcrypto -lssl
 
 all: build $(BUILD_DIR)/$(TARGET)
+
 
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
@@ -25,9 +30,9 @@ $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(GCC) $(CXXFLAGS) $(INCLUDES) $(LIBRARIES) $(LINKER_LIBS) -c $< -o $@
 
-$(BUILD_DIR)/$(TARGET): $(OBJECTS)
+$(BUILD_DIR)/$(TARGET): $(OBJ)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$(TARGET) $^ $(LIBRARIES) $(LINKER_LIBS)
+	$(CXX) -g -fopenmp -o $@ $^ $(LIBRARIES) $(LINKER_LIBS)
 
 PHONY: all build clean debug release
 

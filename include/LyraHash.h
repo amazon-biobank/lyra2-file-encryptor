@@ -1,2 +1,2 @@
-unsigned char* generateSalt(int saltSize);
-unsigned char* LyraHash(char *input, char *salt);
+unsigned char* generateSalt(char* returnSalt, int saltSize);
+int LyraHash(unsigned char* hashOutput, char *input, char *salt);
