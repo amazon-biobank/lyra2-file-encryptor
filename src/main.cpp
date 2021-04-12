@@ -4,6 +4,7 @@
 
 #include "aesFile.h"
 #include "LyraHash.h"
+#include "FileAux.h"
 
 #define SALT_SIZE 16
 
@@ -53,6 +54,12 @@ int main(void){
 
     fclose(pEncryptedTestFile);
     fclose(pDecryptedTestFile);
+
+    size_t encryptedFileSize = getFileSize("encrypted.lock");
+    size_t plainFileSize =getFileSize("decrypted.pem");
+
+    printf("Encrypted size: %zu bytes\n", encryptedFileSize);
+    printf("Plain size: %zu bytes\n", plainFileSize);
 
     return 0;
 }

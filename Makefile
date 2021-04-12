@@ -9,6 +9,7 @@ LIBRARIES 	:= -L.lib/
 CPPSRC      	:=           		 			\
 	$(wildcard src/*.cpp) 		 			\
 	$(wildcard src/HashWrapper/*.cpp) 		\
+	$(wildcard src/FileAux/*.cpp) 		\
 	$(wildcard src/AES/*.cpp) 				\
 
 CSRC      	:=           		 			\

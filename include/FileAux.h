@@ -1,0 +1,1 @@
+size_t getFileSize(char const *filePath);
