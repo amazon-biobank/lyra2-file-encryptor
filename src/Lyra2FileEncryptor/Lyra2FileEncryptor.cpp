@@ -42,7 +42,8 @@ void encryptFile(char *inputFilePath, char *outputFilePath, char *password){
     addJsonElementName("encrypted_content", outputFile);
     aesFileEncrypt(inputFile, outputFile, passowrdLyraHashed);
     endElement(false, outputFile);
-    addJsonElement("hashing_alg", "Lyra2-256", outputFile, false, strlen("Lyra2-256"));
+    addJsonElement("hashing_alg", "Lyra2", outputFile, false, strlen("Lyra2"));
+    addJsonElement("hashing_output_len", "256", outputFile, false, strlen("256"));
     addJsonElement("hashing_t_cost", "1", outputFile, false, strlen("1"));
     addJsonElement("hashing_mem_cost", "49152", outputFile, false, strlen("49152"));
     addJsonElement("encrypt_alg", "AES-cfb-128", outputFile, false, strlen("AES-cfb-128"));
