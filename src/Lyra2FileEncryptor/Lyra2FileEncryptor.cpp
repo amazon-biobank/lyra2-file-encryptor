@@ -30,7 +30,7 @@ void encryptFile(char *inputFilePath, char *outputFilePath, char *password){
     
     generateSalt(randomSalt, SALT_SIZE);
 
-    if (LyraHash(passowrdLyraHashed, password, randomSalt) != 0){
+    if (LyraHash(passowrdLyraHashed, password, randomSalt, SALT_SIZE) != 0){
         printf("Couldn't hash the password.\n");
         return;
     }
@@ -74,9 +74,6 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
 
     file.close();
 
-    // i can't explain why, but if i remove this print, the code stops working
-    std::cout << inputJson["salt"] << std::endl;
-
     // transform inputJson in char*:
     std::string saltString = fastWriter.write(inputJson["salt"]);
 
@@ -105,12 +102,12 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
     fwrite(encryptedBytes, 1, cypherSize, tmpFileEncrypt);
     fclose(tmpFileEncrypt);
 
-    if (LyraHash(passowrdLyraHashed, password, (char *) salt) != 0){
+    if (LyraHash(passowrdLyraHashed, password, (char *) salt, SALT_SIZE) != 0){
         printf("Couldn't hash the password.\n");
         return;
     }
     FILE * tmpBytes = fopen("tmp.decrypt", "rb");
-
+    
     aesFileDecrypt(tmpBytes, outputFile, passowrdLyraHashed);
 
     fclose(outputFile);
@@ -122,6 +119,17 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
     remove ("tmp.decrypt");
 }
 
-void getDecryptedContentFromFile(FILE *inputFile, char *contentOutput, unsigned char *password){
+char * getDecryptedContentFromFile(char *inputFilePath, char *password){
+    decryptFile(inputFilePath, "tmp.getContent", password);
 
+    std::ifstream t("tmp.getContent");
+    std::string decryptedContent((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+
+    char *contentOutput = new char[decryptedContent.length() + 1];
+    strcpy(contentOutput, decryptedContent.c_str());
+
+    remove("tmp.getContent");
+
+    return contentOutput;
 }

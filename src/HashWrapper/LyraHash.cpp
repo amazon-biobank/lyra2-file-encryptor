@@ -1,5 +1,6 @@
 #include <string.h>
 #include <random>
+#include <iostream>
 
 #define NROWS 49152
 #define NCOLS 256
@@ -15,14 +16,13 @@ void generateSalt(char* returnSalt, int saltSize){
     returnSalt[saltSize] = '\0';
 }
 
-int LyraHash(unsigned char *hashOutput, char *input, char *salt){
+int LyraHash(unsigned char *hashOutput, char *input, char *salt, unsigned int saltLength){
     unsigned int hashDesiredLength = 64;
 
     unsigned int t_cost = 1;
     unsigned int m_cost = NROWS;
 
     unsigned int inputLength = strlen(input);
-    unsigned int saltLength = strlen(salt);
 
     return PHS(
         hashOutput,         // unsigned char * (tamanho 64); vazio

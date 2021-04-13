@@ -10,9 +10,16 @@ int main(void){
     char encryptedTestPath[] = "encrypted.lock";
     char decryptedTestPath[] = "decrypted.pem";
 
+    char *decryptedContent;
+
     encryptFile(inputTestPath, encryptedTestPath, password);
 
     decryptFile(encryptedTestPath, decryptedTestPath, password);
+
+    decryptedContent = getDecryptedContentFromFile(encryptedTestPath, password);
+
+    printf("\nDecrypted content\n");
+    printf("\n%s\n", decryptedContent);
 
     return 0;
 }
