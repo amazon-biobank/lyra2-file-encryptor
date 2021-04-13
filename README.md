@@ -4,6 +4,85 @@ This repository implements a file encryptor with AES and uses Lyra2 as the passw
 
 The Lyra2 implementation comes from this repository: [Leocalm Lyra](https://github.com/leocalm/Lyra).
 
+## Pre-requisites
+
+- openssl
+- jsoncpp
+
+## How to install
+
+### Install binary
+
+`sudo make install-bin`
+
+check if was succesfull installed: `lyra2encryptor --help`
+
+You can uninstall with `sudo make uninstall-bin`.
+
+#### what does it does?
+
+The installation will copy the resultant binary on `/usr/local/bin/` path in yout linux file system.
+
+### Install linkable library
+
+`sudo make install-lib`
+
+You can uninstall with `sudo make uninstall-lib`.
+
+#### what does it does?
+
+The installation will create a directory called `Lyra2Encryptor/` in the `/usr/local/lib/` and `/usr/local/include/`. The `Lyra2FileEncryptor.h` will be copied to `/usr/local/include/Lyra2FileEncryptor.h` and `Lyra2FileEncryptor.a` will be copied to `/usr/local/lib/Lyra2FileEncryptor.a`.
+
+#### How to link this library to your c/cpp project.
+
+1. (optional): you can simply copy the installed header file inside the include files inside your project instead.
+
+2. (optional): Add Include directive in your code.
+
+- using from installed path: `#include "Lyra2FileEncryptor.h"`.
+
+- using from copied path: `#include "your_include_folder/Lyra2FileEncryptor.h"`.
+
+3. Specify in linkable libraries in compilation the path for the library. (You can also copy the lybrary installed to a lib folder in the project)
+
+(How do i do that? `-lLyra2Encryptor`)
+
+4. Link with openssl and jsoncpp libraries. (Why? because this lib depends on these dependencies)
+
+Example code:
+
+```
+#include "Lyra2FileEncryptor.h"
+
+int main(void){
+    char password[] = "passwordExample";
+    char fileToEncryptPath[] = "inputTest.pem";
+    char encryptedFilePath[] = "outputTest.lock";
+    char decryptedFilePath[] = "decryptedTest.pem";
+    char *decryptedContent;
+
+    // encrypt file example
+    encryptFile(fileToEncryptPath, encryptedFilePath, password);
+
+    // decrypt file example
+    decryptFile(encryptedFilePath, decryptedFilePath, password);
+
+    // get decrypted string example
+    decryptedContent = getDecryptedContentFromFile(encryptedFilePath, password);
+
+    return 0;
+}
+
+```
+
+Compilation command example if using l2fe from installed root:
+
+`c++ src/main.c -o testProgram -L/usr/lib/jsoncpp -lLyra2FileEncryptor -lcrypto -lssl -ljsoncpp`
+
+Compilation command example if using l2fe from installed root:
+
+`c++ src/main.c -o testProgram -I./include -L./lib -L/usr/lib/jsoncpp -lLyra2FileEncryptor -lcrypto -lssl -ljsoncpp`
+
 ## File hierarchy
 
 ```
