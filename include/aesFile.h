@@ -1,3 +1,5 @@
 #include <openssl/aes.h>
+#include <stdio.h>
 
-void aesFile(FILE * inputFilePointer, int encrypt, FILE * outputFilePointer, unsigned char * password);
+void aesFileEncrypt(FILE * inputFilePointer, FILE * outputFilePointer, unsigned char * password);
+void aesFileDecrypt(FILE * inputFilePointer, FILE * outputFilePointer, unsigned char * password);

@@ -4,12 +4,13 @@ CXXFLAGS 	:= -g -c
 BUILD_DIR   := build
 OBJ_DIR  	:= $(BUILD_DIR)/objects
 TARGET   	:= OurCypher
-INCLUDES 	:= -I./include/ -I/usr/include/openssl/ -I./include/sse/
-LIBRARIES 	:= -L.lib/
+INCLUDES 	:= -I./include/ -I/usr/include/openssl/ -I./include/sse/ -I/usr/include/json/
+LIBRARIES 	:= -L.lib/ -L/usr/lib/jsoncpp
 CPPSRC      	:=           		 			\
 	$(wildcard src/*.cpp) 		 			\
 	$(wildcard src/HashWrapper/*.cpp) 		\
 	$(wildcard src/FileAux/*.cpp) 		\
+	$(wildcard src/Lyra2FileEncryptor/*.cpp) 		\
 	$(wildcard src/AES/*.cpp) 				\
 
 CSRC      	:=           		 			\
@@ -18,7 +19,7 @@ CSRC      	:=           		 			\
 COBJ := $(CSRC:%.c=$(OBJ_DIR)/%.o)
 CPPOBJ := $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o) 
 OBJ := $(COBJ) $(CPPOBJ) 
-LINKER_LIBS := -lcrypto -lssl
+LINKER_LIBS := -lcrypto -lssl -ljsoncpp
 
 all: build $(BUILD_DIR)/$(TARGET)
 
