@@ -11,6 +11,22 @@ The Lyra2 implementation comes from this repository: [Leocalm Lyra](https://gith
 
 ## How to install
 
+## CMake
+
+First, simply call this to setup the build system
+
+`cmake -G "Ninja" -B cmake-build-dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="path_to/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX="path/you/want/to/install/"`
+
+Then, let it build
+
+`cmake --build cmake-build-dir`
+
+Finally, specify where to install (use sudo if the destiny is somewhere protected)
+
+`sudo cmake --install cmake-build-dir`
+
+## Makefile for ubuntu (old version)
+
 ### Install binary
 
 `sudo make install-bin`
