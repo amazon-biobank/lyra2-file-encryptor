@@ -1,5 +1,5 @@
 #include <string.h>
-#include <random>
+#include <stdlib.h>
 #include <iostream>
 
 #define NROWS 49152
@@ -9,8 +9,9 @@ extern "C" int PHS(void*, size_t, const void*, size_t, const void*, size_t, unsi
 
 void generateSalt(char* returnSalt, int saltSize){
     char saltChar;
+    srand (time(NULL));
     for (int i; i < saltSize; i++){
-        saltChar = (char) (random());
+        saltChar = (char) (rand());
         returnSalt[i] = saltChar;
     }
     returnSalt[saltSize] = '\0';
