@@ -2,3 +2,4 @@ build/
 decrypted.pem
 encrypted.lock
 ibmUser.id
+cmake-build-dir/
