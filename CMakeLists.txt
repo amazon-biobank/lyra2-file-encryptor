@@ -69,7 +69,6 @@ endif()
 
 include_directories("include/")
 include_directories("include/sse")
-include_directories("${OPENSSL_ROOT_DIR}/include/")
 
 add_library(Lyra2FileEncryptor
         ${sse_include}
@@ -79,7 +78,7 @@ add_library(Lyra2FileEncryptor
         ${HashWrapper_src}
         ${Lyra2_src}
         ${Lyra2FileEncryptor_src}
-)
+  "include/json/config.h")
 
 # install compiled lib
 install(TARGETS Lyra2FileEncryptor

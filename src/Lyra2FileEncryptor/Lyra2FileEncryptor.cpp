@@ -4,12 +4,13 @@
 #include "JsonEncryptionFormatter.h"
 #include "base64Util.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <json/value.h>
 #include <json/json.h>
 #include <json/writer.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <fstream>
 #include <iostream>
 #include <string>
