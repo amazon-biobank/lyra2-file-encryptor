@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 3.18.4 FATAL_ERROR)
 
+include(CMakePackageConfigHelpers)
+
+set(Lyra2FileEncryptor_VERSION 1.0.0)
+
 project(libLyra2FileEncryptor
 	DESCRIPTION "Lyra2FileEncryptor library"
-	VERSION 1.0.0
+	VERSION ${Lyra2FileEncryptor_VERSION}
 )
 
 find_package(OpenSSL REQUIRED)
 find_package(jsoncpp REQUIRED)
 
 set(sse_include
-	    blake2b-load-sse2
+	blake2b-load-sse2
         blake2b-load-sse41
         blake2b-round
         Lyra2
@@ -77,8 +81,28 @@ add_library(Lyra2FileEncryptor
         ${FileAux_src}
         ${HashWrapper_src}
         ${Lyra2_src}
-        ${Lyra2FileEncryptor_src}
-  "include/json/config.h")
+        ${Lyra2FileEncryptor_src})
+
+# Configure package cmake files
+configure_package_config_file(cmake/config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/Lyra2FileEncryptor
+        NO_SET_AND_CHECK_MACRO
+)
+
+write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config-version.cmake
+        VERSION ${Lyra2FileEncryptor_VERSION}
+        COMPATIBILITY SameMajorVersion
+)
+
+# Install package files
+install(
+        FILES
+                ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config-version.cmake
+        DESTINATION
+                ${CMAKE_INSTALL_PREFIX}/cmake/Lyra2FileEncryptor)
 
 # install compiled lib
 install(TARGETS Lyra2FileEncryptor
