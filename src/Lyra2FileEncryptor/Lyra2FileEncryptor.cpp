@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
-#include <jsoncpp/json/writer.h>
+#include <json/value.h>
+#include <json/json.h>
+#include <json/writer.h>
 #include <fstream>
 #include <iostream>
 #include <string>

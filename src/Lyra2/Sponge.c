@@ -26,6 +26,10 @@
 #include "Sponge.h"
 #include "Lyra2.h"
 
+#ifndef __uint128_t
+    #define __uint128_t unsigned long long
+#endif
+
 /**
  * Execute G function, with all 12 rounds for Blake2 and  BlaMka, and 24 round for half-round BlaMka.
  * 

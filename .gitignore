@@ -3,3 +3,6 @@ decrypted.pem
 encrypted.lock
 ibmUser.id
 cmake-build-dir/
+out/
+.vs/
+CMakeSettings.json

@@ -69,6 +69,7 @@ endif()
 
 include_directories("include/")
 include_directories("include/sse")
+include_directories("${OPENSSL_ROOT_DIR}/include/")
 
 add_library(Lyra2FileEncryptor
         ${sse_include}

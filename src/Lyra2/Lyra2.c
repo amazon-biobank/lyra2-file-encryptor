@@ -26,6 +26,10 @@
 #include "Lyra2.h"
 #include "Sponge.h"
 
+#ifndef __uint128_t
+    #define __uint128_t unsigned long long
+#endif
+
 /**
  * Executes Lyra2 based on the G function from Blake2b or BlaMka. The number of columns of the memory matrix is set to nCols = N_COLS.
  * This version supports salts and passwords whose combined length is smaller than the size of the memory matrix,
