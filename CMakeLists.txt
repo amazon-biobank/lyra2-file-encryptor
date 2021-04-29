@@ -104,6 +104,8 @@ install(
         DESTINATION
                 ${CMAKE_INSTALL_PREFIX}/cmake/Lyra2FileEncryptor)
 
+install(TARGETS Lyra2FileEncryptor EXPORT Lyra2FileEncryptor-targets)
+
 # install compiled lib
 install(TARGETS Lyra2FileEncryptor
 	DESTINATION
@@ -115,3 +117,7 @@ install(FILES "include/Lyra2FileEncryptor.h"
 	DESTINATION
 		${CMAKE_INSTALL_PREFIX}/include/
 )
+
+install(EXPORT Lyra2FileEncryptor-targets
+	NAMESPACE Lyra2FileEncryptor::
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/Lyra2FileEncryptor)
