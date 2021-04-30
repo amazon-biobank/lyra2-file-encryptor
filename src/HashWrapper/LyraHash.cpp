@@ -5,9 +5,7 @@
 #define NROWS 49152
 #define NCOLS 256
 
-extern "C" {
-    #include "Lyra2.h"
-}
+#include "Lyra2.h"
 
 void generateSalt(char* returnSalt, int saltSize){
     char saltChar;
