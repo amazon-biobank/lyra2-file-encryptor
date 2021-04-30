@@ -5,7 +5,9 @@
 #define NROWS 49152
 #define NCOLS 256
 
-extern "C" int PHS(void*, size_t, const void*, size_t, const void*, size_t, unsigned int, unsigned int);
+extern "C" {
+    #include "Lyra2.h"
+}
 
 void generateSalt(char* returnSalt, int saltSize){
     char saltChar;
