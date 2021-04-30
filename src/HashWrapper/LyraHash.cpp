@@ -7,7 +7,7 @@
 
 extern "C" int PHS(void*, size_t, const void*, size_t, const void*, size_t, unsigned int, unsigned int);
 
-unsigned char generateSalt(char* returnSalt, int saltSize){
+void generateSalt(char* returnSalt, int saltSize){
     char saltChar;
     srand (time(NULL));
     for (int i; i < saltSize; i++){
