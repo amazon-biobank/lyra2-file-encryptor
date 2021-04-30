@@ -129,10 +129,6 @@ static inline __m128i fBlaMka(__m128i x, __m128i y){
   G2_BLAMKA(v[0],v[2],v[4],v[6],v[1],v[3],v[5],v[7]); \
   DIAGONALIZE(v[0],v[2],v[4],v[6],v[1],v[3],v[5],v[7]);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //---- Housekeeping
 void initState(__m128i state[/*8*/]);
 
@@ -152,9 +148,5 @@ void reducedDuplexRowWanderingParallel(__m128i *state, __m128i *rowInOut0, __m12
 
 //---- Misc
 void printArray(unsigned char *array, unsigned int size, char *name);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* SPONGE_H_ */
