@@ -6,3 +6,4 @@ cmake-build-dir/
 out/
 .vs/
 CMakeSettings.json
+build-test/
