@@ -35,7 +35,7 @@
  * 
  * @param v     A 1024-bit (8 __m128i) array to be processed by Blake2b's or BlaMka's G function
  */
-static inline void spongeLyra(__m128i *v){
+static void spongeLyra(__m128i *v){
     __m128i t0, t1;
     int i;
 
@@ -58,7 +58,7 @@ static inline void spongeLyra(__m128i *v){
  * Executes a reduced version of G function with only RHO round
  * @param v     A 1024-bit (8 __m128i) array to be processed by Blake2b's or BlaMka's G function
  */
-static inline void reducedSpongeLyra(__m128i *v){
+static void reducedSpongeLyra(__m128i *v){
     __m128i t0, t1;
     int i;
 
@@ -88,7 +88,7 @@ static inline void reducedSpongeLyra(__m128i *v){
  * 
  * @param state         The 1024-bit array to be initialized
  */
-inline void initState(__m128i state[/*8*/]){
+ void initState(__m128i state[/*8*/]){
     //first 512 bits are zeros
     memset(state, 0, 64); 
     //Remainder BLOCK_LEN_BLAKE2_SAFE_BYTES are reserved to the IV
@@ -106,7 +106,7 @@ inline void initState(__m128i state[/*8*/]){
  * @param state The current state of the sponge 
  * @param in    The block to be absorbed (BLOCK_LEN_BLAKE2_SAFE_INT128 words)
  */
-inline void absorbBlockBlake2Safe(__m128i *state, const __m128i *in) {
+ void absorbBlockBlake2Safe(__m128i *state, const __m128i *in) {
     //XORs the first BLOCK_LEN_BLAKE2_SAFE_INT64 words of "in" with the current state
     state[0] = _mm_xor_si128(state[0], in[0]);
     state[1] = _mm_xor_si128(state[1], in[1]);
@@ -125,7 +125,7 @@ inline void absorbBlockBlake2Safe(__m128i *state, const __m128i *in) {
  * @param state     The current state of the sponge 
  * @param rowOut    Row to receive the data squeezed
  */
-inline void reducedSqueezeRow0(__m128i* state, __m128i* rowOut) {
+ void reducedSqueezeRow0(__m128i* state, __m128i* rowOut) {
     __m128i* ptrWord = rowOut + (N_COLS-1)*BLOCK_LEN_INT128; //In Lyra2: pointer to M[0][C-1]
     int i, j;
     //M[row][C-1-col] = H.reduced_squeeze()    
@@ -152,7 +152,7 @@ inline void reducedSqueezeRow0(__m128i* state, __m128i* rowOut) {
  * @param rowIn		Row to feed the sponge
  * @param rowOut	Row to receive the sponge's output
  */
-inline void reducedDuplexRow1and2(__m128i *state, __m128i *rowIn, __m128i *rowOut) {
+ void reducedDuplexRow1and2(__m128i *state, __m128i *rowIn, __m128i *rowOut) {
     __m128i* ptrWordIn = rowIn;                                 //In Lyra2: pointer to prev
     __m128i* ptrWordOut = rowOut + (N_COLS-1)*BLOCK_LEN_INT128; //In Lyra2: pointer to row
     int i, j;
@@ -196,7 +196,7 @@ inline void reducedDuplexRow1and2(__m128i *state, __m128i *rowIn, __m128i *rowOu
  * @param rowOut         Row receiving the output
  *
  */
-inline void reducedDuplexRowFilling(__m128i *state, __m128i *rowInOut, __m128i *rowIn0, __m128i *rowIn1, __m128i *rowOut) {
+ void reducedDuplexRowFilling(__m128i *state, __m128i *rowInOut, __m128i *rowIn0, __m128i *rowIn1, __m128i *rowOut) {
     __m128i* ptrWordIn0 = rowIn0;				//In Lyra2: pointer to prev0, the last row ever initialized
     __m128i* ptrWordIn1 = rowIn1;				//In Lyra2: pointer to prev1, the last row ever revisited and updated
     __m128i* ptrWordInOut = rowInOut;				//In Lyra2: pointer to row1, to be revisited and updated
@@ -263,7 +263,7 @@ inline void reducedDuplexRowFilling(__m128i *state, __m128i *rowInOut, __m128i *
  * @param rowIn1         Another row used only as input
  *
  */
-inline void reducedDuplexRowWandering(__m128i *state, __m128i *rowInOut0, __m128i *rowInOut1, __m128i *rowIn0, __m128i *rowIn1) {
+ void reducedDuplexRowWandering(__m128i *state, __m128i *rowInOut0, __m128i *rowInOut1, __m128i *rowIn0, __m128i *rowIn1) {
     __m128i* ptrWordInOut0 = rowInOut0; //In Lyra2: pointer to row0
     __m128i* ptrWordInOut1 = rowInOut1; //In Lyra2: pointer to row1
     __m128i* ptrWordIn0;                //In Lyra2: pointer to prev0
@@ -330,7 +330,7 @@ inline void reducedDuplexRowWandering(__m128i *state, __m128i *rowInOut0, __m128
  * @param rowIn0         Another row used only as input
  *
  */
-inline void reducedDuplexRowWanderingParallel(__m128i *state, __m128i *rowInOut0, __m128i *rowInP, __m128i *rowIn0) {
+ void reducedDuplexRowWanderingParallel(__m128i *state, __m128i *rowInOut0, __m128i *rowInP, __m128i *rowIn0) {
     __m128i* ptrWordInOut0 = rowInOut0;                 //In Lyra2: pointer to row0
     __m128i* ptrWordInP = rowInP;                       //In Lyra2: pointer to row0_p
     __m128i* ptrWordIn0;                                //In Lyra2: pointer to prev0
@@ -374,7 +374,7 @@ inline void reducedDuplexRowWanderingParallel(__m128i *state, __m128i *rowInOut0
  * @param state The current state of the sponge 
  * @param in    The row whose column (BLOCK_LEN_INT128 words) should be absorbed 
  */
-inline void absorbColumn(__m128i *state, __m128i *in) {
+ void absorbColumn(__m128i *state, __m128i *in) {
     __m128i* ptrWordIn = in;
     int i;
     
