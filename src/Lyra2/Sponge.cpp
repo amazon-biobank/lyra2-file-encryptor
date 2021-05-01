@@ -1,6 +1,6 @@
 /**
  * A simple implementation of Blake2b's and BlaMka's internal permutation 
- * in the form of a sponge. SSE-optimized implementation.
+ * in the form of a sponge.
  * 
  * Author: The Lyra PHC team (http://www.lyra2.net/) -- 2015.
  * 
@@ -20,34 +20,29 @@
  */
 #include <string.h>
 #include <stdio.h>
-#include <immintrin.h>
 
-#include "blake2b-round.h"
 #include "Sponge.h"
 #include "Lyra2.h"
-
-#ifndef __uint128_t
-    #define __uint128_t unsigned long long
-#endif
 
 /**
  * Execute G function, with all 12 rounds for Blake2 and  BlaMka, and 24 round for half-round BlaMka.
  * 
- * @param v     A 1024-bit (8 __m128i) array to be processed by Blake2b's or BlaMka's G function
+ * @param v     A 1024-bit (16 uint64_t) array to be processed by Blake2b's or BlaMka's G function
  */
-static void spongeLyra(__m128i *v){
-    __m128i t0, t1;
+static void spongeLyra(uint64_t *v) {
     int i;
-
+    
 #if (SPONGE == 0)
     for (i = 0; i < 12; i++){
-        ROUND(i);
+        ROUND_LYRA(i);
     }
 #elif (SPONGE == 1)
     for (i = 0; i < 12; i++){
         ROUND_LYRA_BLAMKA(i);
     }
 #elif (SPONGE == 2)
+    uint64_t t0,t1,t2;
+    
     for (i = 0; i < 24; i++){
         HALF_ROUND_LYRA_BLAMKA(i);
     }
@@ -56,21 +51,22 @@ static void spongeLyra(__m128i *v){
 
 /**
  * Executes a reduced version of G function with only RHO round
- * @param v     A 1024-bit (8 __m128i) array to be processed by Blake2b's or BlaMka's G function
+ * @param v     A 1024-bit (16 uint64_t) array to be processed by Blake2b's or BlaMka's G function
  */
-static void reducedSpongeLyra(__m128i *v){
-    __m128i t0, t1;
+static void reducedSpongeLyra(uint64_t *v) {
     int i;
-
+    
 #if (SPONGE == 0)
     for (i = 0; i < RHO; i++){
-        ROUND(i);
+        ROUND_LYRA(i);
     }
 #elif (SPONGE == 1)
     for (i = 0; i < RHO; i++){
         ROUND_LYRA_BLAMKA(i);
     }
 #elif (SPONGE == 2)
+    uint64_t t0,t1,t2;
+    
     for (i = 0; i < RHO; i++){
         HALF_ROUND_LYRA_BLAMKA(i);
     }
@@ -78,7 +74,7 @@ static void reducedSpongeLyra(__m128i *v){
 }
 
 /**
- * Initializes the Sponge State. The first 512 bits are set to zeros and the remainder 
+ * Initializes the Sponge's State. The first 512 bits are set to zeros and the remainder 
  * receive Blake2b's IV as per Blake2b's specification. <b>Note:</b> Even though sponges
  * typically have their internal state initialized with zeros, Blake2b's G function
  * has a fixed point: if the internal state and message are both filled with zeros. the 
@@ -88,30 +84,37 @@ static void reducedSpongeLyra(__m128i *v){
  * 
  * @param state         The 1024-bit array to be initialized
  */
- void initState(__m128i state[/*8*/]){
-    //first 512 bits are zeros
+void initState(uint64_t state[/*16*/]) {
+    //First 512 bis are zeros
     memset(state, 0, 64); 
     //Remainder BLOCK_LEN_BLAKE2_SAFE_BYTES are reserved to the IV
-    state[4] = _mm_load_si128((__m128i *) &blake2b_IV[0]);
-    state[5] = _mm_load_si128((__m128i *) &blake2b_IV[2]);
-    state[6] = _mm_load_si128((__m128i *) &blake2b_IV[4]);
-    state[7] = _mm_load_si128((__m128i *) &blake2b_IV[6]);
+    state[8] = blake2b_IV[0];
+    state[9] = blake2b_IV[1];
+    state[10] = blake2b_IV[2];
+    state[11] = blake2b_IV[3];
+    state[12] = blake2b_IV[4];
+    state[13] = blake2b_IV[5];
+    state[14] = blake2b_IV[6];
+    state[15] = blake2b_IV[7];
 }
 
-
 /**
- * Performs an absorb operation for a single block (BLOCK_LEN_BLAKE2_SAFE_INT128 
- * words of type __m128i), using G function as the internal permutation
+ * Performs an absorb operation for a single block (BLOCK_LEN_BLAKE2_SAFE_INT64 
+ * words of type uint64_t), using G function as the internal permutation
  * 
  * @param state The current state of the sponge 
- * @param in    The block to be absorbed (BLOCK_LEN_BLAKE2_SAFE_INT128 words)
+ * @param in    The block to be absorbed (BLOCK_LEN_BLAKE2_SAFE_INT64 words)
  */
- void absorbBlockBlake2Safe(__m128i *state, const __m128i *in) {
+void absorbBlockBlake2Safe(uint64_t *state, const uint64_t *in) {
     //XORs the first BLOCK_LEN_BLAKE2_SAFE_INT64 words of "in" with the current state
-    state[0] = _mm_xor_si128(state[0], in[0]);
-    state[1] = _mm_xor_si128(state[1], in[1]);
-    state[2] = _mm_xor_si128(state[2], in[2]);
-    state[3] = _mm_xor_si128(state[3], in[3]);
+    state[0] ^= in[0];
+    state[1] ^= in[1];
+    state[2] ^= in[2];
+    state[3] ^= in[3];
+    state[4] ^= in[4];
+    state[5] ^= in[5];
+    state[6] ^= in[6];
+    state[7] ^= in[7];
 
     //Applies the transformation f to the sponge's state
     spongeLyra(state);
@@ -125,57 +128,56 @@ static void reducedSpongeLyra(__m128i *v){
  * @param state     The current state of the sponge 
  * @param rowOut    Row to receive the data squeezed
  */
- void reducedSqueezeRow0(__m128i* state, __m128i* rowOut) {
-    __m128i* ptrWord = rowOut + (N_COLS-1)*BLOCK_LEN_INT128; //In Lyra2: pointer to M[0][C-1]
+void reducedSqueezeRow0(uint64_t* state, uint64_t* rowOut) {
+    uint64_t* ptrWord = rowOut + (N_COLS-1)*BLOCK_LEN_INT64; //In Lyra2: pointer to M[0][C-1]
     int i, j;
-    //M[row][C-1-col] = H.reduced_squeeze()    
+    //M[0][C-1-col] = H.reduced_squeeze()    
     for (i = 0; i < N_COLS; i++) {
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
             ptrWord[j] = state[j];
         }
+        
+	//Goes to next block (column) that will receive the squeezed data
+	ptrWord -= BLOCK_LEN_INT64;
 
-        //Goes to next block (column) that will receive the squeezed data
-        ptrWord -= BLOCK_LEN_INT128;
-
-        //Applies the reduced-round transformation f to the sponge's state
+	//Applies the reduced-round transformation f to the sponge's state
         reducedSpongeLyra(state);
     }
 }
 
-
 /** 
  * Performs a reduced duplex operation for a single row, from the highest to 
- * the lowest index, using the reduced-round G function as the 
- * internal permutation
+ * the lowest index of its columns, using the reduced-round G function 
+ * as the internal permutation
  * 
  * @param state		The current state of the sponge 
  * @param rowIn		Row to feed the sponge
  * @param rowOut	Row to receive the sponge's output
  */
- void reducedDuplexRow1and2(__m128i *state, __m128i *rowIn, __m128i *rowOut) {
-    __m128i* ptrWordIn = rowIn;                                 //In Lyra2: pointer to prev
-    __m128i* ptrWordOut = rowOut + (N_COLS-1)*BLOCK_LEN_INT128; //In Lyra2: pointer to row
+void reducedDuplexRow1and2(uint64_t *state, uint64_t *rowIn, uint64_t *rowOut) {
+    uint64_t* ptrWordIn = rowIn;				//In Lyra2: pointer to prev
+    uint64_t* ptrWordOut = rowOut + (N_COLS-1)*BLOCK_LEN_INT64; //In Lyra2: pointer to row
     int i, j;
 
     for (i = 0; i < N_COLS; i++) {
 
-	//Absorbing "M[prev][col]"
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            state[j] = _mm_xor_si128(state[j], ptrWordIn[j]);
+	//Absorbing "M[0][col]"
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            state[j] ^= (ptrWordIn[j]);
         }
 
 	//Applies the reduced-round transformation f to the sponge's state
         reducedSpongeLyra(state);
 
-	//M[row][C-1-col] = M[prev][col] XOR rand
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordOut[j] = _mm_xor_si128(state[j], ptrWordIn[j]);
+	//M[1][C-1-col] = M[0][col] XOR rand
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            ptrWordOut[j] = ptrWordIn[j]  ^ state[j];
         }
-
+	
 	//Input: next column (i.e., next block in sequence)
-	ptrWordIn += BLOCK_LEN_INT128;
+	ptrWordIn += BLOCK_LEN_INT64;
 	//Output: goes to previous column
-	ptrWordOut -= BLOCK_LEN_INT128;
+	ptrWordOut -= BLOCK_LEN_INT64;
     }
 }
 
@@ -187,7 +189,8 @@ static void reducedSpongeLyra(__m128i *v){
  * employed to make  
  * "M[rowOut][(N_COLS-1)-col] = M[rowIn0][col] XOR rand" and 
  * "M[rowInOut][col] =  M[rowInOut][col] XOR rot(rand)", 
- * where rot is a 128-bit rotation to the left and N_COLS is a system parameter.
+ * where rot is a right rotation by 'omega' bits (e.g., 1 or more words)
+ * and N_COLS is a system parameter.
  *
  * @param state          The current state of the sponge 
  * @param rowInOut       Row used as input and to receive output after rotation
@@ -196,51 +199,42 @@ static void reducedSpongeLyra(__m128i *v){
  * @param rowOut         Row receiving the output
  *
  */
- void reducedDuplexRowFilling(__m128i *state, __m128i *rowInOut, __m128i *rowIn0, __m128i *rowIn1, __m128i *rowOut) {
-    __m128i* ptrWordIn0 = rowIn0;				//In Lyra2: pointer to prev0, the last row ever initialized
-    __m128i* ptrWordIn1 = rowIn1;				//In Lyra2: pointer to prev1, the last row ever revisited and updated
-    __m128i* ptrWordInOut = rowInOut;				//In Lyra2: pointer to row1, to be revisited and updated
-    __m128i* ptrWordOut = rowOut + (N_COLS-1)*BLOCK_LEN_INT128; //In Lyra2: pointer to row0, to be initialized
+void reducedDuplexRowFilling(uint64_t *state, uint64_t *rowInOut, uint64_t *rowIn0, uint64_t *rowIn1, uint64_t *rowOut) {
+    uint64_t* ptrWordIn0 = rowIn0;				//In Lyra2: pointer to prev0, the last row ever initialized
+    uint64_t* ptrWordIn1 = rowIn1;				//In Lyra2: pointer to prev1, the last row ever revisited and updated
+    uint64_t* ptrWordInOut = rowInOut;				//In Lyra2: pointer to row1, to be revisited and updated
+    uint64_t* ptrWordOut = rowOut + (N_COLS-1)*BLOCK_LEN_INT64; //In Lyra2: pointer to row0, to be initialized
     
-    int i, j; 
-    
-    __m128i stateLocal[8];
-    for (i=0; i< 8; i++) {stateLocal[i] = state[i];}
-    
+    int i, j;    
+
     for (i = 0; i < N_COLS; i++) { 
 	//Absorbing "M[row1] [+] M[prev0] [+] M[prev1]"
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            stateLocal[j] = _mm_xor_si128(stateLocal[j], _mm_add_epi64(_mm_add_epi64(ptrWordInOut[j],ptrWordIn0[j]),ptrWordIn1[j]));
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            state[j]  ^= (ptrWordInOut[j]  + ptrWordIn0[j]  + ptrWordIn1[j]);
         }
         
 	//Applies the reduced-round transformation f to the sponge's state
-        reducedSpongeLyra(stateLocal);
+        reducedSpongeLyra(state);
         
-	//M[row0][col] = M[prev0][col] XOR rand        
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordOut[j] = _mm_xor_si128(stateLocal[j], ptrWordIn0[j]);
+	//M[row0][col] = M[prev0][col] XOR rand
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            ptrWordOut[j] = ptrWordIn0[j]  ^ state[j];
         }
         
-	//M[row1][col] = M[row1][col] XOR rot(rand)        
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordInOut[j] = _mm_xor_si128(ptrWordInOut[j], stateLocal[(j+1) % BLOCK_LEN_INT128]);
+	//M[row1][col] = M[row1][col] XOR rot(rand)
+        //rot(): right rotation by 'omega' bits (e.g., 1 or more words)
+        //we rotate 2 words for compatibility with the SSE implementation
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            ptrWordInOut[j]  ^= state[(j+2) % BLOCK_LEN_INT64];
         }
+
 	//Inputs: next column (i.e., next block in sequence)
-	ptrWordInOut += BLOCK_LEN_INT128;
-	ptrWordIn0 += BLOCK_LEN_INT128;
-	ptrWordIn1 += BLOCK_LEN_INT128;
+	ptrWordInOut += BLOCK_LEN_INT64;
+	ptrWordIn0 += BLOCK_LEN_INT64;
+	ptrWordIn1 += BLOCK_LEN_INT64;
 	//Output: goes to previous column
-	ptrWordOut -= BLOCK_LEN_INT128;
+	ptrWordOut -= BLOCK_LEN_INT64;
     }
-    
-    state[0] = stateLocal[0];
-    state[1] = stateLocal[1];
-    state[2] = stateLocal[2];
-    state[3] = stateLocal[3];
-    state[4] = stateLocal[4];
-    state[5] = stateLocal[5];
-    state[6] = stateLocal[6];
-    state[7] = stateLocal[7];
 }
 
 /**
@@ -263,54 +257,52 @@ static void reducedSpongeLyra(__m128i *v){
  * @param rowIn1         Another row used only as input
  *
  */
- void reducedDuplexRowWandering(__m128i *state, __m128i *rowInOut0, __m128i *rowInOut1, __m128i *rowIn0, __m128i *rowIn1) {
-    __m128i* ptrWordInOut0 = rowInOut0; //In Lyra2: pointer to row0
-    __m128i* ptrWordInOut1 = rowInOut1; //In Lyra2: pointer to row1
-    __m128i* ptrWordIn0;                //In Lyra2: pointer to prev0
-    __m128i* ptrWordIn1;                //In Lyra2: pointer to prev1
-    uint64_t randomColumn0;             //In Lyra2: col0
-    uint64_t randomColumn1;             //In Lyra2: col1
+void reducedDuplexRowWandering(uint64_t *state, uint64_t *rowInOut0, uint64_t *rowInOut1, uint64_t *rowIn0, uint64_t *rowIn1) {
+    uint64_t* ptrWordInOut0 = rowInOut0; //In Lyra2: pointer to row0
+    uint64_t* ptrWordInOut1 = rowInOut1; //In Lyra2: pointer to row1
+    uint64_t* ptrWordIn0;                //In Lyra2: pointer to prev0
+    uint64_t* ptrWordIn1;                //In Lyra2: pointer to prev1
+    uint64_t randomColumn0;              //In Lyra2: col0
+    uint64_t randomColumn1;              //In Lyra2: col1
     
     int i, j;
-    
-    __m128i stateLocal[8];
-    for (i = 0; i < 8; i++) {stateLocal[i] = state[i];}
-    
-    for (i = 0; i < N_COLS; i++) { 
+
+    for (i = 0; i < N_COLS; i++) {
         
-        //col_0 = lsw(rot^2(rand)) mod N_COLS
-        //randomColumn0 = (((uint64_t)((__uint128_t *)stateLocal)[2]) & (N_COLS-1))*BLOCK_LEN_INT128;          /*(USE THIS IF N_COLS IS A POWER OF 2)*/
-        randomColumn0 =  (((uint64_t)((__uint128_t *)stateLocal)[2]) % N_COLS)*BLOCK_LEN_INT128;               /*(USE THIS FOR THE "GENERIC" CASE)*/
+        //col0 = lsw(rot^2(rand)) mod N_COLS
+        //randomColumn0 = ((uint64_t)state[4] & (N_COLS-1))*BLOCK_LEN_INT64;            /*(USE THIS IF N_COLS IS A POWER OF 2)*/
+        randomColumn0 = ((uint64_t)state[4] % N_COLS)*BLOCK_LEN_INT64;                  /*(USE THIS FOR THE "GENERIC" CASE)*/
         ptrWordIn0 = rowIn0 + randomColumn0; 
         
-        //col_1 = lsw(rot^3(rand)) mod N_COLS
-        //randomColumn1 = (((uint64_t)((__uint128_t *)stateLocal)[3]) & (N_COLS-1))*BLOCK_LEN_INT128;          /*(USE THIS IF N_COLS IS A POWER OF 2)*/
-        randomColumn1 =  (((uint64_t)((__uint128_t *)stateLocal)[3]) % N_COLS)*BLOCK_LEN_INT128;               /*(USE THIS FOR THE "GENERIC" CASE)*/
+        //col1 = lsw(rot^3(rand)) mod N_COLS
+        //randomColumn1 = ((uint64_t)state[6] & (N_COLS-1))*BLOCK_LEN_INT64;            /*(USE THIS IF N_COLS IS A POWER OF 2)*/
+        randomColumn1 = ((uint64_t)state[6] % N_COLS)*BLOCK_LEN_INT64;                  /*(USE THIS FOR THE "GENERIC" CASE)*/
         ptrWordIn1 = rowIn1 + randomColumn1; 
         
-    	//Absorbing "M[row0] [+] M[row1] [+] M[prev0] [+] M[prev1]"
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            stateLocal[j] = _mm_xor_si128(stateLocal[j], _mm_add_epi64( _mm_add_epi64( ptrWordInOut0[j] , ptrWordInOut1[j] ) , _mm_add_epi64( ptrWordIn0[j] , ptrWordIn1[j] )));
+	//Absorbing "M[row0] [+] M[row1] [+] M[prev0] [+] M[prev1]"
+        for (j = 0; j < BLOCK_LEN_INT64; j++){ 
+            state[j] ^= (ptrWordInOut0[j]  + ptrWordInOut1[j]  + ptrWordIn0[j]  + ptrWordIn1[j]);
         }
 
 	//Applies the reduced-round transformation f to the sponge's state
-        reducedSpongeLyra(stateLocal);
+        reducedSpongeLyra(state);
 
 	//M[rowInOut0][col] = M[rowInOut0][col] XOR rand
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordInOut0[j] = _mm_xor_si128(stateLocal[j], ptrWordInOut0[j]);
-        }        
+        for (j = 0; j < BLOCK_LEN_INT64; j++){ 
+            ptrWordInOut0[j] ^= state[j];
+        }
         
         //M[rowInOut1][col] = M[rowInOut1][col] XOR rot(rand)
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordInOut1[j] = _mm_xor_si128(ptrWordInOut1[j], stateLocal[(j+1) % BLOCK_LEN_INT128]);
+        //rot(): right rotation by 'omega' bits (e.g., 1 or more words)
+        //we rotate 2 words for compatibility with the SSE implementation
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            ptrWordInOut1[j]  ^= state[(j+2) % BLOCK_LEN_INT64];
         }
 
-	//Goes to next block
-        ptrWordInOut0 += BLOCK_LEN_INT128;
-        ptrWordInOut1 += BLOCK_LEN_INT128; 
+	//Goes to next column
+        ptrWordInOut0 += BLOCK_LEN_INT64;
+        ptrWordInOut1 += BLOCK_LEN_INT64; 
     }
-    for (i = 0; i < 8; i++) {state[i] = stateLocal[i];}
 }
 
 /**
@@ -318,7 +310,7 @@ static void reducedSpongeLyra(__m128i *v){
  * "M[rowInOut0][col] [+] M[rowInP][col] [+] M[rowIn0][col_0]", 
  * where [+] denotes wordwise addition, ignoring carries between words. The value of
  * "col_0" is computed as "lsw(rot^3(rand)) mod N_COLS", where lsw() means "the least significant word" 
- * (assuming 64-bit words), rot is a 128-bit  rotation to the left, 
+ * (assuming 64-bit words), rot is a 128-bit  rotation to the right, 
  * N_COLS is a system parameter, and "rand" corresponds
  * to the sponge's output for each column absorbed.
  * The same output is then employed to make 
@@ -330,59 +322,56 @@ static void reducedSpongeLyra(__m128i *v){
  * @param rowIn0         Another row used only as input
  *
  */
- void reducedDuplexRowWanderingParallel(__m128i *state, __m128i *rowInOut0, __m128i *rowInP, __m128i *rowIn0) {
-    __m128i* ptrWordInOut0 = rowInOut0;                 //In Lyra2: pointer to row0
-    __m128i* ptrWordInP = rowInP;                       //In Lyra2: pointer to row0_p
-    __m128i* ptrWordIn0;                                //In Lyra2: pointer to prev0
-    uint64_t randomColumn0;                             //In Lyra2: col0
+void reducedDuplexRowWanderingParallel(uint64_t *state, uint64_t *rowInOut0, uint64_t *rowInP, uint64_t *rowIn0) {
+    uint64_t* ptrWordInOut0 = rowInOut0;        //In Lyra2: pointer to row0
+    uint64_t* ptrWordInP = rowInP;              //In Lyra2: pointer to row0_p
+    uint64_t* ptrWordIn0;                       //In Lyra2: pointer to prev0
+    uint64_t randomColumn0;                     //In Lyra2: col0
 
     int i, j;
-    
-    __m128i stateLocal[8];
-    for (i=0; i< 8; i++) {stateLocal[i] = state[i];}
-    
+
     for (i = 0; i < N_COLS; i++) {
         //col0 = lsw(rot^3(rand)) mod N_COLS
-        //randomColumn0 = (((uint64_t)((__uint128_t *)stateLocal)[3]) & (N_COLS-1))*BLOCK_LEN_INT128;            /*(USE THIS IF N_COLS IS A POWER OF 2)*/
-        randomColumn0 = (((uint64_t)((__uint128_t *)stateLocal)[3]) % N_COLS)*BLOCK_LEN_INT128;                  /*(USE THIS FOR THE "GENERIC" CASE)*/
-        ptrWordIn0 = rowIn0 + randomColumn0; 
+        //randomColumn0 = ((uint64_t)state[6] & (N_COLS-1))*BLOCK_LEN_INT64;       /*(USE THIS IF N_COLS IS A POWER OF 2)*/
+        randomColumn0 = ((uint64_t)state[6] % N_COLS)*BLOCK_LEN_INT64;             /*(USE THIS FOR THE "GENERIC" CASE)*/
+        ptrWordIn0 = rowIn0 + randomColumn0;  
         
         //Absorbing "M[row0] [+] M[prev0] [+] M[row0p]"
-        for (j = 0; j < BLOCK_LEN_INT128; j++) {
-            stateLocal[j] = _mm_xor_si128(stateLocal[j], _mm_add_epi64( ptrWordInOut0[j] , _mm_add_epi64( ptrWordIn0[j] , ptrWordInP[j] )));
+        for (j = 0; j < BLOCK_LEN_INT64; j++) {
+            state[j]  ^= (ptrWordInOut0[j] + ptrWordIn0[j] + ptrWordInP[j]);
         } 
-        
+
         //Applies the reduced-round transformation f to the sponge's state
-        reducedSpongeLyra(stateLocal);
+        reducedSpongeLyra(state);
         
         //M[rowInOut0][col] = M[rowInOut0][col] XOR rand
-        for (j = 0; j < BLOCK_LEN_INT128; j++){
-            ptrWordInOut0[j] = _mm_xor_si128(ptrWordInOut0[j], stateLocal[j]);
+        for (j = 0; j < BLOCK_LEN_INT64; j++){
+            ptrWordInOut0[j]  ^= state[j];
         }
         
-        //Goes to next block
-        ptrWordInOut0 += BLOCK_LEN_INT128;
-        ptrWordInP += BLOCK_LEN_INT128; 
+        //Goes to next column
+        ptrWordInOut0 += BLOCK_LEN_INT64;
+        ptrWordInP += BLOCK_LEN_INT64; 
     }
-    for (i = 0; i < 8; i++) {state[i] = stateLocal[i];}
 }
+
 
 /**
  * Performs an absorb operation of single column from "in", 
  * using the full-round G function as the internal permutation
  * 
  * @param state The current state of the sponge 
- * @param in    The row whose column (BLOCK_LEN_INT128 words) should be absorbed 
+ * @param in    The row whose column (BLOCK_LEN_INT64 words) should be absorbed 
  */
- void absorbColumn(__m128i *state, __m128i *in) {
-    __m128i* ptrWordIn = in;
+void absorbColumn(uint64_t *state, uint64_t *in) {
+    uint64_t* ptrWordIn = in;                
     int i;
     
     //absorbs the column picked
-    for (i = 0; i < BLOCK_LEN_INT128; i++){
-        state[i] = _mm_xor_si128( state[i], ptrWordIn[i]);
+    for (i = 0; i < BLOCK_LEN_INT64; i++){
+        state[i] ^= ptrWordIn[i];
     }
-
+    
     //Applies the full-round transformation f to the sponge's state
     spongeLyra(state);
 }
@@ -395,18 +384,17 @@ static void reducedSpongeLyra(__m128i *v){
  * @param out        Array that will receive the data squeezed
  * @param len        The number of bytes to be squeezed into the "out" array
  */
-void squeeze(__m128i *state, byte *out, unsigned int len) {
+void squeeze(uint64_t *state, byte *out, unsigned int len) {
     int fullBlocks = len / BLOCK_LEN_BYTES;
     byte *ptr = out;
     int i;
     //Squeezes full blocks
     for (i = 0; i < fullBlocks; i++) {
-        memcpy(ptr, state, BLOCK_LEN_BYTES);
-        spongeLyra(state);
-
-        ptr += BLOCK_LEN_BYTES;
+	memcpy(ptr, state, BLOCK_LEN_BYTES);
+	spongeLyra(state);
+	ptr += BLOCK_LEN_BYTES;
     }
-    
+
     //Squeezes remaining bytes
     memcpy(ptr, state, (len % BLOCK_LEN_BYTES));
 }
@@ -418,7 +406,7 @@ void printArray(unsigned char *array, unsigned int size, char *name) {
     int i;
     printf("%s: ", name);
     for (i = 0; i < size; i++) {
-        printf("%2x|", array[i]);
+	printf("%2x|", array[i]);
     }
     printf("\n");
 }

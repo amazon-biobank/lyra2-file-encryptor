@@ -12,10 +12,7 @@ project(libLyra2FileEncryptor
 find_package(OpenSSL REQUIRED)
 find_package(jsoncpp REQUIRED)
 
-set(sse_include
-	blake2b-load-sse2
-        blake2b-load-sse41
-        blake2b-round
+set(Lyra2_include
         Lyra2
         Sponge
 )
@@ -52,7 +49,7 @@ set(Lyra2FileEncryptor_src
         Lyra2FileEncryptor
 )
 
-list(TRANSFORM sse_include PREPEND "include/sse/")
+list(TRANSFORM Lyra2_include PREPEND "include/Lyra2/")
 list(TRANSFORM src_include PREPEND "include/")
 list(TRANSFORM AES_src PREPEND "src/AES/")
 list(TRANSFORM FileAux_src PREPEND "src/FileAux/")
@@ -61,21 +58,18 @@ list(TRANSFORM Lyra2_src PREPEND "src/Lyra2/")
 list(TRANSFORM Lyra2FileEncryptor_src PREPEND "src/Lyra2FileEncryptor/")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-	add_compile_options(
-		-openmp)
+	add_compile_options(-openmp)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-	add_compile_options(
-		-fopenmp)
+	add_compile_options(-fopenmp)
 elseif(MSVC)
-	add_compile_options(
-		/openmp)
+	add_compile_options(/openmp)
 endif()
 
 include_directories("include/")
-include_directories("include/sse")
+include_directories("include/Lyra2")
 
 add_library(Lyra2FileEncryptor
-        ${sse_include}
+        ${Lyra2_include}
         ${src_include}
         ${AES_src}
         ${FileAux_src}

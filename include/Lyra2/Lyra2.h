@@ -1,5 +1,5 @@
 /**
- * Header file for the Lyra2 Password Hashing Scheme (PHS). SSE-oriented implementation.
+ * Header file for the Lyra2 Password Hashing Scheme (PHS).
  * 
  * Author: The Lyra PHC team (http://www.lyra2.net/) -- 2015.
  * 
@@ -31,21 +31,10 @@ typedef unsigned char byte ;
 #endif
 
 #define ROW_LEN_INT64 (BLOCK_LEN_INT64 * N_COLS)                //Total length of a row: N_COLS blocks
-
-#define ROW_LEN_INT128 (ROW_LEN_INT64/2)                        
-
 #define ROW_LEN_BYTES (ROW_LEN_INT64 * 8)                       //Number of bytes per row
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 int LYRA2(void *K, unsigned int kLen, const void *pwd, unsigned int pwdlen, const void *salt, unsigned int saltlen, unsigned int timeCost, unsigned int nRows, unsigned int nCols);
 
 int PHS(void *out, size_t outlen, const void *in, size_t inlen, const void *salt, size_t saltlen, unsigned int t_cost, unsigned int m_cost);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LYRA2_H_ */
