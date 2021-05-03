@@ -10,7 +10,7 @@
 void generateSalt(char* returnSalt, int saltSize){
     char saltChar;
     srand (time(NULL));
-    for (int i; i < saltSize; i++){
+    for (int i = 0; i < saltSize; i++){
         saltChar = (char) (rand());
         returnSalt[i] = saltChar;
     }
