@@ -124,9 +124,7 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
 char * getDecryptedContentFromFile(char *inputFilePath, char *password){
     decryptFile(inputFilePath, "tmp.getContent", password);
 
-    std::ifstream t("tmp.getContent");
-    std::string decryptedContent((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
+    std::string decryptedContent = get_file_contents("tmp.getContent");
 
     char *contentOutput = new char[decryptedContent.length() + 1];
     strcpy(contentOutput, decryptedContent.c_str());
