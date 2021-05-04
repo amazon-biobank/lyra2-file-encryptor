@@ -6,6 +6,7 @@
 #include <streambuf>
 #include <iostream>
 
+#include "FileAux.h"
 #include "base64Util.h"
 
 void aesFileEncrypt(FILE * inputFilePointer, FILE * outputFilePointer, unsigned char * password){
@@ -40,9 +41,8 @@ void aesFileEncrypt(FILE * inputFilePointer, FILE * outputFilePointer, unsigned 
 
     fclose(tempFile);
 
-    std::ifstream t("tmp.encrypt");
-    std::string encryptedContent((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
+    std::string encryptedContent = getFileContents("tmp.encrypt");
+
     unsigned char *cypher64Base = new unsigned char[encryptedContent.length() + 1];
     memcpy(cypher64Base, encryptedContent.c_str(), encryptedContent.length());
 
