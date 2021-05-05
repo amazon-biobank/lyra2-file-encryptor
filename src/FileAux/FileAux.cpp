@@ -12,7 +12,7 @@ size_t getFileSize(char const *filePath){
     return file_size;
 }
 
-string get_file_contents(const char* filename)
+string getFileContents(const char* filename)
 {
     FILE* fp = fopen(filename, "rb");
     if (fp)

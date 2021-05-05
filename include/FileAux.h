@@ -1,4 +1,5 @@
 #include <string>
 
+using namespace std;
 size_t getFileSize(char const *filePath);
-std::string getFileContents(const char* filename);
+string getFileContents(const char* filename);
