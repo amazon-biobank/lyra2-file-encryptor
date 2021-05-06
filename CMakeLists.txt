@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18.4 FATAL_ERROR)
 
 include(CMakePackageConfigHelpers)
 
-set(Lyra2FileEncryptor_VERSION 1.0.0)
+set(Lyra2FileEncryptor_VERSION 1.2.0)
 
 project(libLyra2FileEncryptor
 	DESCRIPTION "Lyra2FileEncryptor library"
@@ -107,7 +107,9 @@ install(TARGETS Lyra2FileEncryptor
 )
 
 # install Header file
-install(FILES "include/Lyra2FileEncryptor.h"
+install(FILES 
+                "include/Lyra2FileEncryptor.h"
+                "include/Lyra2/Lyra2.h"
 	DESTINATION
 		${CMAKE_INSTALL_PREFIX}/include/
 )
