@@ -68,7 +68,7 @@ endif()
 include_directories("include/")
 include_directories("include/Lyra2")
 
-add_library(Lyra2FileEncryptor
+add_library(lyra2-file-encryptor
         ${Lyra2_include}
         ${src_include}
         ${AES_src}
@@ -79,13 +79,13 @@ add_library(Lyra2FileEncryptor
 
 # Configure package cmake files
 configure_package_config_file(cmake/config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/Lyra2FileEncryptor
+        ${CMAKE_CURRENT_BINARY_DIR}/lyra2-file-encryptor-config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/lyra2-file-encryptor
         NO_SET_AND_CHECK_MACRO
 )
 
 write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config-version.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/lyra2-file-encryptor-config-version.cmake
         VERSION ${Lyra2FileEncryptor_VERSION}
         COMPATIBILITY SameMajorVersion
 )
@@ -93,15 +93,15 @@ write_basic_package_version_file(
 # Install package files
 install(
         FILES
-                ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config.cmake
-                ${CMAKE_CURRENT_BINARY_DIR}/Lyra2FileEncryptor-config-version.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/lyra2-file-encryptor-config.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/lyra2-file-encryptor-config-version.cmake
         DESTINATION
-                ${CMAKE_INSTALL_PREFIX}/cmake/Lyra2FileEncryptor)
+                ${CMAKE_INSTALL_PREFIX}/cmake/lyra2-file-encryptor)
 
-install(TARGETS Lyra2FileEncryptor EXPORT Lyra2FileEncryptor-targets)
+install(TARGETS lyra2-file-encryptor EXPORT lyra2-file-encryptor-targets)
 
 # install compiled lib
-install(TARGETS Lyra2FileEncryptor
+install(TARGETS lyra2-file-encryptor
 	DESTINATION
 		${CMAKE_INSTALL_PREFIX}/lib/
 )
@@ -114,6 +114,6 @@ install(FILES
 		${CMAKE_INSTALL_PREFIX}/include/
 )
 
-install(EXPORT Lyra2FileEncryptor-targets
+install(EXPORT lyra2-file-encryptor-targets
 	NAMESPACE Lyra2FileEncryptor::
-	DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/Lyra2FileEncryptor)
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/lyra2-file-encryptor)
