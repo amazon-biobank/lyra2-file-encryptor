@@ -45,11 +45,11 @@ Finally, install our package:
 
 In windows:
 
-- `vcpkg install lyra2fileencryptor:x86-windows-static`; (x86)
-- `vcpkg install lyra2fileencryptor:x64-windows-static`; (x64)
+- `vcpkg install lyra2-file-encryptor:x86-windows-static`; (x86)
+- `vcpkg install lyra2-file-encryptor:x64-windows-static`; (x64)
 
 In linux:
-- `vcpkg install lyra2fileencryptor`;
+- `vcpkg install lyra2-file-encryptor`;
 
 Integrating with your CMake project:
 
