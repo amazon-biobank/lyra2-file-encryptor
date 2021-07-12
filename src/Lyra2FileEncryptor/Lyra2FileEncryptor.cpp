@@ -3,6 +3,7 @@
 #include "FileAux.h"
 #include "JsonEncryptionFormatter.h"
 #include "base64Util.h"
+#include "cypherString.h"
 
 #include <json/value.h>
 #include <json/json.h>
@@ -20,9 +21,9 @@
 #define SALT_SIZE 16
 #define HASH_SIZE 64
 
-void encryptFile(char *inputFilePath, char *outputFilePath, char *password){
-    FILE * inputFile = fopen(inputFilePath, "rb");
-    FILE * outputFile = fopen(outputFilePath, "wb");
+void encryptFile(std::string inputFilePath, std::string outputFilePath, std::string password){
+    FILE * inputFile = fopen(inputFilePath.c_str(), "rb");
+    FILE * outputFile = fopen(outputFilePath.c_str(), "wb");
 
     size_t outputSize;
 
@@ -31,7 +32,7 @@ void encryptFile(char *inputFilePath, char *outputFilePath, char *password){
     
     generateSalt(randomSalt, SALT_SIZE);
 
-    if (LyraHash(passowrdLyraHashed, password, randomSalt, SALT_SIZE) != 0){
+    if (LyraHash(passowrdLyraHashed, (char *) password.c_str(), randomSalt, SALT_SIZE) != 0){
         printf("Couldn't hash the password.\n");
         return;
     }
@@ -58,8 +59,8 @@ void encryptFile(char *inputFilePath, char *outputFilePath, char *password){
     free(randomSalt);
 }
 
-void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
-    FILE * outputFile = fopen(outputFilePath, "wb");
+void decryptFile(std::string inputFilePath, std::string outputFilePath, std::string password){
+    FILE * outputFile = fopen(outputFilePath.c_str(), "wb");
 
     unsigned char* passowrdLyraHashed = (unsigned char*) malloc(HASH_SIZE * sizeof(unsigned char));
     unsigned char* salt;
@@ -104,7 +105,7 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
     fwrite(encryptedBytes, 1, cypherSize, tmpFileEncrypt);
     fclose(tmpFileEncrypt);
 
-    if (LyraHash(passowrdLyraHashed, password, (char *) salt, SALT_SIZE) != 0){
+    if (LyraHash(passowrdLyraHashed, (char *) password.c_str(), (char *) salt, SALT_SIZE) != 0){
         printf("Couldn't hash the password.\n");
         return;
     }
@@ -121,7 +122,7 @@ void decryptFile(char *inputFilePath, char *outputFilePath, char *password){
     remove ("tmp.decrypt");
 }
 
-char * getDecryptedContentFromFile(char *inputFilePath, char *password){
+std::string getDecryptedContentFromFile(std::string inputFilePath, std::string password){
     decryptFile(inputFilePath, "tmp.getContent", password);
 
     std::string decryptedContent = getFileContents("tmp.getContent");
@@ -132,4 +133,60 @@ char * getDecryptedContentFromFile(char *inputFilePath, char *password){
     remove("tmp.getContent");
 
     return contentOutput;
+}
+
+std::string encryptString(std::string stringToEncrypt, std::string password){
+    unsigned char* passowrdLyraHashed = (unsigned char*) malloc(HASH_SIZE * sizeof(unsigned char));
+    char* randomSalt = (char*) malloc(sizeof(char) * (SALT_SIZE + 1));
+    generateSalt(randomSalt, SALT_SIZE);
+    size_t saltSize = 0;
+    if (LyraHash(passowrdLyraHashed, (char *) password.c_str(), randomSalt, SALT_SIZE) != 0){
+        printf("Couldn't hash the password.\n");
+        return "";
+    }
+
+    passowrdLyraHashed[HASH_SIZE] = '\0';
+    // Cypher content
+    std::string cypheredContent(cypherString(stringToEncrypt, passowrdLyraHashed));
+
+    // encode salt
+    char* saltBase64C = base64_encode(
+        (unsigned char *) randomSalt,
+        SALT_SIZE,
+        &saltSize
+    );
+    std::string saltBase64(saltBase64C, saltSize);
+
+    // Generate cypher json
+    Json::Value jsonCypher;
+    jsonCypher["hashing_alg"] = "Lyra2";
+    jsonCypher["hashing_output_len"] = 256;
+    jsonCypher["hashing_t_cost"] = 1;
+    jsonCypher["hashing_mem_cost"] = 49152;
+    jsonCypher["encrypt_alg"] = "AES-cfb-128";
+    jsonCypher["salt"] = saltBase64;
+    jsonCypher["encrypted_content"] = cypheredContent.c_str();
+
+    std::string outputJson = jsonCypher.toStyledString();
+
+    return outputJson;
+}
+
+std::string decryptString(std::string stringToDecrypt, std::string password, std::string saltString){
+    // First hash the password with the salt.
+    unsigned char* passowrdLyraHashed = (unsigned char*) malloc(HASH_SIZE * sizeof(unsigned char));
+    const char *salt64Base = saltString.c_str();
+    size_t saltSize = 0;
+    unsigned char* salt = base64_decode(
+        salt64Base,
+        strlen(salt64Base),
+        &saltSize
+    );
+    if (LyraHash(passowrdLyraHashed, (char *) password.c_str(), (char *) salt, SALT_SIZE) != 0){
+        printf("Couldn't hash the password.\n");
+        return "";
+    }
+    std::string cypheredString = decypherString(stringToDecrypt, passowrdLyraHashed);
+    
+    return cypheredString;
 }

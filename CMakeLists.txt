@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16.3 FATAL_ERROR)
 
 include(CMakePackageConfigHelpers)
 
@@ -24,10 +24,12 @@ set(src_include
         JsonEncryptionFormatter
         Lyra2FileEncryptor
         LyraHash
+        cypherString
 )
 
 set(AES_src
         aesFile
+        cypherString
 )
 
 set(FileAux_src
