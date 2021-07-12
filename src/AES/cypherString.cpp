@@ -21,11 +21,6 @@ std::string cypherString(std::string stringToCypher, unsigned char* password){
     AES_set_encrypt_key(ckey, KEY_SIZE_BITS, &key);
     // AES_KEY generated
 
-    // Pad input string to be multiple of 4 and be decoded
-    // while(stringToCypher.size() % 4 != 0)
-    //     stringToCypher.append(" ");
-    // input padded
-
     // Decode input string in base64
     size_t decodedInputLength;
     unsigned char* decodedInputString = (unsigned char*) malloc(stringToCypher.size());  // No malloc, because base64_decode already mallocs
@@ -44,12 +39,7 @@ std::string cypherString(std::string stringToCypher, unsigned char* password){
     int charactersEncrypted = 0;
     int startIndex = 0;
 
-    std::cout << "startIndex: " << startIndex << std::endl;
-    std::cout << "decodedInputLength: " << decodedInputLength << std::endl;
-
     bool isEncryptionEnd = (startIndex >= decodedInputLength);
-    
-    std::cout << "isEncryptionEnd: " << isEncryptionEnd << std::endl;
 
     while(!isEncryptionEnd){
         // Transfering bytes to indata buffer
@@ -62,13 +52,6 @@ std::string cypherString(std::string stringToCypher, unsigned char* password){
             memcpy(indata, &decodedInputString[startIndex], bytesRead);
         }
 
-        // DEBUG (TO CYPHER BYTES)
-        std::cout << "indata buffer: ";
-        for (int i = 0; i < bytesRead; i++)
-            printf(" %u ", indata[i]);
-        std::cout << std::endl;
-        // DEBUG
-
         // Transferred bytes to indata buffer
         AES_cfb128_encrypt(
             indata,                 // unsigned char * holds block to cypher
@@ -79,13 +62,6 @@ std::string cypherString(std::string stringToCypher, unsigned char* password){
             &charactersEncrypted,   // int, number of characters cyphered
             AES_ENCRYPT             // AES operation macro. AES_ENCRYPT | AES_DECRYPT
         );
-
-        // DEBUG (CYPHERED BYTES)
-        std::cout << "outdata buffer: ";
-        for (int i = 0; i < bytesRead; i++)
-            printf(" %u ", outdata[i]);
-        std::cout << std::endl;
-        // DEBUG
 
         memcpy(&encryptedBytes[startIndex], outdata, bytesRead * sizeof(unsigned char));
         startIndex += bytesRead;
