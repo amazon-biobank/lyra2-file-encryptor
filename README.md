@@ -1,6 +1,6 @@
 # Lyra2 file encryptor
 
-This repository implements a file encryptor with AES and uses Lyra2 as the password hashing algorithm
+This repository implements a file encryptor with AES and uses Lyra2 as the password hashing algorithm. It's developed as a vcpkg packet.
 
 The Lyra2 implementation comes from this repository: [Leocalm Lyra](https://github.com/leocalm/Lyra).
 
@@ -10,6 +10,53 @@ The Lyra2 implementation comes from this repository: [Leocalm Lyra](https://gith
 - jsoncpp
 
 ## How to install
+
+### VCPKG
+
+First, clone a vcpkg repository with this repo entry:
+
+- Oficial vcpkg from microsoft;
+- Our vcpkg fork;
+
+Then bootstrap vcpkg (if not bootstraped already):
+
+- `./bootstrap-vcpkg.sh` on linux;
+- `bootstrap-vcpkg.bat` on windows;
+
+Then integrate vcpkg (if not already integrated):
+
+- `vcpkg integrate install`
+
+Then install dependencies (if not already installed):
+
+In windows:
+
+- `vcpkg install jsoncpp:x86-windows-static`; (x86)
+- `vcpkg install jsoncpp:x64-windows-static`; (x64)
+
+- `vcpkg install openssl:x86-windows-static`; (x86)
+- `vcpkg install openssl:x64-windows-static`; (x64)
+
+In linux:
+- `vcpkg install jsoncpp`;
+- `vcpkg install openssl`;
+
+Finally, install our package:
+
+In windows:
+
+- `vcpkg install lyra2-file-encryptor:x86-windows-static`; (x86)
+- `vcpkg install lyra2-file-encryptor:x64-windows-static`; (x64)
+
+In linux:
+- `vcpkg install lyra2-file-encryptor`;
+
+Integrating with your CMake project:
+
+- `cmake -G "Ninja" -B build -DCMAKE_TOOLCHAIN_FILE="C:\\path\\to\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"`
+- `cmake -G "Ninja" -B build -DCMAKE_TOOLCHAIN_FILE="~/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake"`
+
+## Own build
 
 ## CMake
 
