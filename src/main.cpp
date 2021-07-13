@@ -9,11 +9,6 @@
 #include "Lyra2FileEncryptor.h"
 
 int main(int argc, char *argv[ ]){
-    // char *command;
-    // char *inputPath;
-    // char *outputPath;
-    // char *password;
-
     std::string command;
     std::string inputPath;
     std::string outputPath;
@@ -85,18 +80,18 @@ int main(int argc, char *argv[ ]){
             outputPath = std::string(argv[4]);
             password = std::string(argv[5]);
 
-            if (strcmp(fileMode.c_str(), "-f") != 0){
+            if (fileMode.compare("-f") != 0){
                 printf("Invalid options.\nTry --help\".\n");
                 return 0;
             }
 
-            if (strcmp(command.c_str(), "encrypt") == 0){
+            if (command.compare("encrypt") == 0){
                 encryptFile(inputPath, outputPath, password);
-                printf("Succesfully encrypted file. Output file is %s\n", outputPath.c_str());
+                std::cout << "Succesfully encrypted file. Output file is " << outputPath << std::endl;
             }
-            else if(strcmp(command.c_str(), "decrypt") == 0){
+            else if(command.compare("decrypt") == 0){
                 decryptFile(inputPath, outputPath, password);
-                printf("Succesfully decrypted file. Output file is %s\n", outputPath.c_str());
+                std::cout << "Succesfully decrypted file. Output file is " << outputPath << std::endl;
             }
             else{
                 printf("Invalid options.\nTry --help\".\n");
