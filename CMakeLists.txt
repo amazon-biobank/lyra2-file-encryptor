@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16.3 FATAL_ERROR)
 
 include(CMakePackageConfigHelpers)
 
-set(Lyra2FileEncryptor_VERSION 1.2.0)
+set(Lyra2FileEncryptor_VERSION 1.3.0)
 
 project(libLyra2FileEncryptor
 	DESCRIPTION "Lyra2FileEncryptor library"
@@ -18,24 +18,20 @@ set(Lyra2_include
 )
 
 set(src_include
-        aesFile
         base64Util
         FileAux
-        JsonEncryptionFormatter
         Lyra2FileEncryptor
         LyraHash
         cypherString
 )
 
 set(AES_src
-        aesFile
         cypherString
 )
 
 set(FileAux_src
         base64Util
         FileAux
-        JsonEncryptionFormatter
 )
 
 set(HashWrapper_src
