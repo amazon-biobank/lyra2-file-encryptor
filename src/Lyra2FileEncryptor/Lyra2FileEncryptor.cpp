@@ -1,7 +1,5 @@
-#include "aesFile.h"
 #include "LyraHash.h"
 #include "FileAux.h"
-#include "JsonEncryptionFormatter.h"
 #include "base64Util.h"
 #include "cypherString.h"
 
@@ -13,7 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
-#include <iostream>
 #include <string>
 
 #define ENCRYPT 1

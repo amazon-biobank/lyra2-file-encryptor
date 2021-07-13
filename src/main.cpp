@@ -23,9 +23,14 @@ int main(int argc, char *argv[ ]){
         case 2:
             if (strcmp(argv[1], "--help") == 0) {
                 printf("Usage: \n");
-                printf("\t encrypt: input-path output-path password\n");
-                printf("\t decrypt: input-path output-path password\n");
+                printf("\t encrypt -f input-path output-path password\n");
+                printf("\t decrypt -f input-path output-path password\n");
+                printf("\t encrypt password \"text-to-cypher\"\n");
+                printf("\t decrypt password salt cyphered-text\n");
                 printf("Inputs:\n");
+                printf(" - -f: activate file enc/decryption mode\n");
+                printf(" - salt: password salt used for the encryption of a given cypher (available only in console mode)\n");
+                printf(" - text-to-cypher: plain text to be encrypted via console mode. Must use double quotes around them and escape \" in text\n");
                 printf(" - input-path: the file to encrypt or decrypt\n");
                 printf(" - output-path: the resultant file encrypted or decrypted\n");
                 printf(" - password: password used to encrypt or decrypt file\n");
@@ -46,11 +51,11 @@ int main(int argc, char *argv[ ]){
                 std::cout << encryptedString << std::endl;
             }
             else if(strcmp(command.c_str(), "decrypt") == 0){
-                printf("Missing salt.\nTry --help\".\n");
+                std::cout << "Missing salt.\nTry --help\".\n";
                 return 0;
             }
             else{
-                printf("Invalid options.\nTry --help\".\n");
+                std::cout << "Invalid options.\nTry --help\".\n";
                 return 0;
             }
             break;
@@ -61,7 +66,7 @@ int main(int argc, char *argv[ ]){
             text = std::string(argv[4]);
 
             if (strcmp(command.c_str(), "encrypt") == 0){
-                printf("Too many arguments.\nTry --help\".\n");
+                std::cout << "Too many arguments.\nTry --help\".\n";
                 return 0;
             }
             else if(strcmp(command.c_str(), "decrypt") == 0){
@@ -69,7 +74,7 @@ int main(int argc, char *argv[ ]){
                 std::cout << decryptedString << std::endl;
             }
             else{
-                printf("Invalid options.\nTry --help\".\n");
+                std::cout << "Invalid options.\nTry --help\".\n";
                 return 0;
             }
             break;
@@ -81,7 +86,7 @@ int main(int argc, char *argv[ ]){
             password = std::string(argv[5]);
 
             if (fileMode.compare("-f") != 0){
-                printf("Invalid options.\nTry --help\".\n");
+                std::cout << "Invalid options.\nTry --help\".\n";
                 return 0;
             }
 
@@ -94,13 +99,13 @@ int main(int argc, char *argv[ ]){
                 std::cout << "Succesfully decrypted file. Output file is " << outputPath << std::endl;
             }
             else{
-                printf("Invalid options.\nTry --help\".\n");
+                std::cout << "Invalid options.\nTry --help\".\n";
                 return 0;
             }
             break;
 
         default:
-            printf("Invalid options.\nTry --help\".\n");
+            std::cout << "Invalid options.\nTry --help\".\n";
             return 0;
     }
 
